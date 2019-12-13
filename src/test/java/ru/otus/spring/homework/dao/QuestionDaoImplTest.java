@@ -21,7 +21,7 @@ public class QuestionDaoImplTest {
     @Test
     void shouldCorrectParseObject() throws FileNotFoundException {
 
-        CSVReader reader= new CSVReader(new FileReader(ClassLoader.getSystemResource("csv/questions.csv").getFile()), ';');
+        CSVReader reader= new CSVReader(new FileReader(ClassLoader.getSystemResource("csv/ru_questions.csv").getFile()), ';');
         assertEquals(Boolean.FALSE, StringUtils.isEmpty(reader));
 
         ColumnPositionMappingStrategy<Question> strategy = new ColumnPositionMappingStrategy<>();

@@ -3,37 +3,58 @@ package ru.otus.spring.homework.dao;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 import ru.otus.spring.homework.domain.Question;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+@PropertySource("classpath:application.properties")
+@Component
 public class QuestionDaoImpl implements QuestionDao {
 
-    public Map getQuestions() {
-        return generateAnswerMap();
+    @Value("${path.to.csv}")
+    //демонстрация чтения из проперти-файла
+    private String csvPath;
+
+    private final MessageSource messageSource;
+
+    @Autowired
+    public QuestionDaoImpl (MessageSource messageSource) {
+        this.messageSource = messageSource;
     }
 
-    private Resource resource;
-
-    public Resource getResource() {
-        return resource;
+    public Map<Question, Integer> getQuestions(int localeNumber) {
+        return generateAnswerMap(localeNumber);
     }
 
-    public void setResource(Resource resource) {
-        this.resource = resource;
+    private String getPathToCsv(int localeNumber) {
+        //демонстрация выбора локали
+        switch (localeNumber) {
+            case 1:
+                return messageSource.getMessage(csvPath, new String[]{}, new Locale("ru", "RU"));
+            case 2:
+                return messageSource.getMessage(csvPath, new String[]{}, Locale.US);
+        }
+        return null;
     }
 
-
-    private List<Question> readQuestionsFromCsv() {
+    private List<Question> readQuestionsFromCsv(int localeNumber) throws URISyntaxException {
+        String csvPath = getPathToCsv(localeNumber);
 
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(getResource().getFile()),';');
+            reader = new CSVReader(new FileReader(String.valueOf(Paths.get(ClassLoader.getSystemResource(csvPath).toURI()))), ';');
 
         } catch (IOException ie) {
             ie.printStackTrace();
@@ -49,9 +70,14 @@ public class QuestionDaoImpl implements QuestionDao {
 
     }
 
-    private Map generateAnswerMap() {
+    private Map<Question, Integer> generateAnswerMap(int localeNumber) {
 
-        List<Question> questionList = readQuestionsFromCsv();
+        List<Question> questionList = null;
+        try {
+            questionList = readQuestionsFromCsv(localeNumber);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
         Map<Question, Integer> questionMap = new HashMap<>();
 
         int counter = 0;
