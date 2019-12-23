@@ -3,10 +3,7 @@ package ru.otus.spring.homework.dao;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import ru.otus.spring.homework.domain.Question;
 
@@ -16,35 +13,30 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-@PropertySource("classpath:application.properties")
 @Component
 public class QuestionDaoImpl implements QuestionDao {
 
-    @Value("${path.to.csv}")
-    //демонстрация чтения из проперти-файла
-    private String csvPath;
+    //демонстрация чтения из yaml-файла
+    @Value("${path-RU-csv}")
+    private String csvRuPath;
 
-    private final MessageSource messageSource;
-
-    @Autowired
-    public QuestionDaoImpl (MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
+    @Value("${path-EN-csv}")
+    private String csvEnPath;
 
     public Map<Question, Integer> getQuestions(int localeNumber) {
         return generateAnswerMap(localeNumber);
     }
 
     private String getPathToCsv(int localeNumber) {
+
         //демонстрация выбора локали
         switch (localeNumber) {
             case 1:
-                return messageSource.getMessage(csvPath, new String[]{}, new Locale("ru", "RU"));
+                return csvRuPath;
             case 2:
-                return messageSource.getMessage(csvPath, new String[]{}, Locale.US);
+                return csvEnPath;
         }
         return null;
     }

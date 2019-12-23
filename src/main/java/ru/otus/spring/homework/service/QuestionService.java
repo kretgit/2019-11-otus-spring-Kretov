@@ -1,7 +1,7 @@
 package ru.otus.spring.homework.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 import ru.otus.spring.homework.dao.QuestionDao;
 import ru.otus.spring.homework.domain.Dialog;
@@ -16,33 +16,34 @@ public class QuestionService {
 
     private final QuestionDao dao;
 
-    private final MessageSource messageSource;
-
     @Autowired
-    public QuestionService(QuestionDao dao, MessageSource messageSource) {
+    public QuestionService(QuestionDao dao) {
         this.dao = dao;
-        this.messageSource = messageSource;
     }
 
 
     private Dialog getLocaleText(int localeNumber) {
+
         switch (localeNumber) {
             case 1:
-                return new Dialog(messageSource.getMessage("greeting", new String[]{}, new Locale("ru", "RU")),
-                        messageSource.getMessage("choosing", new String[]{}, new Locale("ru", "RU")),
-                        messageSource.getMessage("variant", new String[]{}, new Locale("ru", "RU")),
-                        messageSource.getMessage("answer.true", new String[]{}, new Locale("ru", "RU")),
-                        messageSource.getMessage("answer.false", new String[]{}, new Locale("ru", "RU")),
-                        messageSource.getMessage("answer.pass", new String[]{}, new Locale("ru", "RU")));
+                return getLocaleDialog(new Locale("ru", "RU"), "messages_ru_RU");
             case 2:
-                return new Dialog(messageSource.getMessage("greeting", new String[]{}, Locale.US),
-                        messageSource.getMessage("choosing", new String[]{}, Locale.US),
-                        messageSource.getMessage("variant", new String[]{}, Locale.US),
-                        messageSource.getMessage("answer.true", new String[]{}, Locale.US),
-                        messageSource.getMessage("answer.false", new String[]{}, Locale.US),
-                        messageSource.getMessage("answer.pass", new String[]{}, Locale.US));
+                return getLocaleDialog(Locale.US, "messages_en_US");
         }
         return null;
+    }
+
+    private static Dialog getLocaleDialog(Locale locale, String messageSourceBasename) {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setDefaultEncoding("UTF8");
+        messageSource.setBasename(messageSourceBasename);
+
+        return new Dialog(messageSource.getMessage("greeting", new String[]{}, locale),
+                messageSource.getMessage("choosing", new String[]{}, locale),
+                messageSource.getMessage("variant", new String[]{}, locale),
+                messageSource.getMessage("answer.true", new String[]{}, locale),
+                messageSource.getMessage("answer.false", new String[]{}, locale),
+                messageSource.getMessage("answer.pass", new String[]{}, locale));
     }
 
 
